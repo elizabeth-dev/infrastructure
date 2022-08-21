@@ -14,6 +14,10 @@ data "cloudinit_config" "moon-1" {
         "ntp_client": "chrony",
         "packages": ["chrony"]
       }
+      "runcmd": [
+        [ "systemctl", "daemon-reload" ],
+        [ "systemctl", "enable", "--now", "docker.service" ]
+      ]
     })
   }
 }

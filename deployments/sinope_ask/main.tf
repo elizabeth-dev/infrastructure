@@ -1,4 +1,11 @@
 terraform {
+  cloud {
+    organization = "elizabeth-dev"
+    workspaces {
+      name = "sinope-ask"
+    }
+  }
+
   required_providers {
     docker = {
       source  = "kreuzwerker/docker"
@@ -7,37 +14,41 @@ terraform {
   }
 }
 
-variable "host" {
+variable "sinope_host" {
   type = string
 }
 
-variable "mongodb_uri" {
+provider "docker" {
+  host     = var.sinope_host
+  ssh_opts = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
+}
+
+/* Sinope Copper */
+
+variable "sinope_mongodb_uri" {
   type = string
   sensitive = true
 }
 
-provider "docker" {
-  host     = var.host
-  ssh_opts = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
+data "docker_registry_image" "sinope-copper" {
+  name = "public.ecr.aws/s1m7q0k0/sinope-copper:latest"
 }
 
-/* Sinope Core */
-
-data "docker_registry_image" "sinope_core" {
-  name = "public.ecr.aws/s1m7q0k0/sinope_core:latest"
+resource "docker_image" "sinope-copper" {
+  name          = data.docker_registry_image.sinope-copper.name
+  pull_triggers = [data.docker_registry_image.sinope-copper.sha256_digest]
 }
 
-resource "docker_image" "sinope_core" {
-  name          = data.docker_registry_image.sinope_core.name
-  pull_triggers = [data.docker_registry_image.sinope_core.sha256_digest]
-}
-
-resource "docker_container" "sinope_core" {
-  name  = "sinope_core"
-  image = docker_image.sinope_core.latest
+resource "docker_container" "sinope-copper" {
+  name  = "sinope-copper"
+  image = docker_image.sinope-copper.latest
   restart = "always"
 
-  env = ["MONGODB_URI=${var.mongodb_uri}"]
+  env = [
+    "MONGODB_URI=${var.sinope_mongodb_uri}",
+    "GOOGLE_APPLICATION_CREDENTIALS=/tmp/client_config.json",
+    "GOOGLE_CLOUD_PROJECT=test-sinope"
+  ]
 
   ports {
     internal = 8080
@@ -47,6 +58,11 @@ resource "docker_container" "sinope_core" {
   ports {
     internal = 8081
     external = 8081
+  }
+
+  volumes {
+    container_path = "/tmp/client_config.json"
+    host_path = "/tmp"
   }
 }
 
