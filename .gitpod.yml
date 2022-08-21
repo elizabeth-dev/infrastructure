@@ -11,3 +11,4 @@ vscode:
     - hashicorp.terraform
     - njzy.stats-bar
     - esbenp.prettier-vscode
+    - mhutchie.git-graph

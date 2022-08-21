@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "4.27.0"
-    }
-  }
-}
-
 provider "aws" {
   region = "eu-west-1"
 }
@@ -71,6 +62,8 @@ resource "aws_instance" "moon-1" {
     network_interface_id = aws_network_interface.moon-1_0.id
     device_index         = 0
   }
+
+  user_data = data.cloudinit_config.moon-1.rendered
 }
 
 resource "aws_eip" "moon-1" {

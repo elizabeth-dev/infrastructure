@@ -11,11 +11,6 @@ variable "host" {
   type = string
 }
 
-variable "host_privkey" {
-  type = string
-  sensitive = true
-}
-
 variable "mongodb_uri" {
   type = string
   sensitive = true
@@ -23,7 +18,6 @@ variable "mongodb_uri" {
 
 provider "docker" {
   host     = var.host
-  key_material = var.host_privkey
   ssh_opts = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
 }
 
