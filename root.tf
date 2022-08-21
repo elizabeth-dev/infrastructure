@@ -1,3 +1,12 @@
+terraform {
+  cloud {
+    organization = "elizabeth-dev"
+    workspaces {
+      name = "infrastructure"
+    }
+  }
+}
+
 module "instances" {
   source = "./instances"
 }

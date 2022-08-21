@@ -2,7 +2,7 @@ image: elizabethdev/gitpod:infrastructure
 
 tasks:
   - init: |
-      echo 'TODO: build project'
+      terraform init
     command: |
       echo 'TODO: start app'
 
